@@ -49,7 +49,7 @@ class CornetRM:
                     msg = 'set.'+model_name+'.setPosition("' + str(int(x)) + ',' + str(int(y)) + ',0")'
 
 
-            except rospy.ServiceException, e:
-                print "Service call failed: %s" % e
+            except rospy.ServiceException as e:
+                print ("Service call failed: %s" % e)
 
 
