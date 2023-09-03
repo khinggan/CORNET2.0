@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """
-add
+Build 1 AP and 3 Stations using mininet-WiFi
+Add container host on the station1
 """
 from containernet.net import Containernet
 from containernet.node import DockerSta, Docker
@@ -70,9 +71,9 @@ def topology(args):
         net.configureWifiNodes()
 
         if '-p' not in args:
-            #net.plotGraph(min_x=-15, max_x=15, min_y=-15, max_y=15)
-	     net.plotGraph(max_x=50, max_y=50)
-
+            net.plotGraph(min_x=-15, max_x=55, min_y=-15, max_y=55)
+            # net.plotGraph(max_x=50, max_y=50)
+        
         for sta in sta_list:
             sta.cmd('service ssh restart')
 
@@ -101,6 +102,6 @@ def topology(args):
 
 
 if __name__ == '__main__':
-    os.system('sudo systemctl stop network-manager')
+    # os.system('sudo systemctl stop network-manager')
     setLogLevel('info')
     topology(sys.argv)
