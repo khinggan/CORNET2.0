@@ -53,7 +53,7 @@ if __name__ == '__main__':
     ap1 = unicodedata.normalize('NFKD', ap1).encode('ascii', 'ignore')
     ap1 = ap1.replace("[", " ")
     ap1 = ap1.replace("]", " ")
-    print ap1
+    print (ap1)
     # centre = list(ap1.split(","))
     args = sys.argv
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         [x, y] = [1, 0]
 
     else:
-        print args[1]
+        print (args[1])
         [x, y] = [1, float(args[1])]
 
     while True:
@@ -83,9 +83,9 @@ if __name__ == '__main__':
         # msg = 'set.mybot.setPosition("'
         msg = 'set.robot1.setPosition("'
         msg = msg + str(float(x)) + ',' + str(float(y)) + ',0")'
-        print msg
+        print (msg)
         result = client(msg)
-        print client("get.robot1.position")
+        print (client("get.robot1.position"))
 
         # print client("get.ap1.position")
         time.sleep(1.0)
