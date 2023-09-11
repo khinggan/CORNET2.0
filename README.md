@@ -55,3 +55,47 @@ then you can load the image with the following command:
 ```bash
 docker load -i containernet_foxy.tar
 ```
+
+## Gazebo in docker
+### Architecture graph
+![commbot](./resources/commbot.png)
+
+### Run
+build docker
+```bash
+$ cd docker_container
+# First build Dockerfile.focalfoxyNWH
+$ docker build -t cornet:focalfoxyNWH -f Dockerfile.focalfoxyNWH .
+# Then build Dockerfile.khinggan
+$ docker build -t commbot:khinggan -f Dockerfile.khinggan .
+```
+network_config
+```bash
+$ cd CORNET2.0
+$ sudo python3 network/network_config.py test.yaml
+```
+gzserver and spawn robots
+```bash
+containernet> xterm robot1
+containernet> xterm robot2
+
+# in xterm robot1
+$ source /opt/ros/foxy/setup.bash
+$ gzserver --verbose -s libgazebo_ros_factory.so
+
+# in xterm robot2
+$ source /opt/ros/foxy/setup.bash
+# replace parameters in <> 
+# ros2 run robot_spawner_pkg spawn_turtlebot <robot_name> <robot_namespace> <position_x> <position_y> <position_z>
+# for example
+$ ros2 run robot_spawner_pkg spawn_turtlebot tb3_0 tb3_0 0.0 0.0 0.0
+```
+gzclient on localhost
+```bash
+# the command below is run on local terminal, not xterm (container)
+# change the GAZEBO_MASTER_URI=<container ip that gzserver run in >:11345
+$ vim /usr/share/gazebo/setup.sh
+# if my container ip (run ifconfig in container to get ip) is 172.17.0.3
+$ export GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI:-http://172.17.0.3:11345}
+$ gzclient
+```

@@ -1,0 +1,6 @@
+FROM cornet:focalfoxyNWH
+RUN . /opt/ros/foxy/setup.sh && \
+    sudo apt-get update && \
+    sudo apt-get install -y ros-foxy-gazebo-ros
+
+RUN sudo apt-get install -y ros-foxy-turtlebot3-gazebo
