@@ -65,8 +65,8 @@ type:
 
 
 image:
-# - "cornet:focalfoxyNWH"
-- "commbot:khinggan"
+- "cornet:focalfoxyNWH"
+# - "commbot:khinggan"
 
 robot_number: 4
 robot_model: "burger"
