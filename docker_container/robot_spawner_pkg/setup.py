@@ -13,6 +13,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name, glob('launch/*.launch.py')),
         ('share/' + package_name, glob('urdf/*')), 
+        ('share/' + package_name, glob('resource/*.sdf'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,7 +26,7 @@ setup(
         'console_scripts': [
             'spawn_turtlebot = robot_spawner_pkg.spawn_turtlebot:main', 
             'turtlebot3_spawner = robot_spawner_pkg.turtlebot3_spawner:main',
-            'vs = comm_based_mrs_formation.vs:main',
+            'vs = robot_spawner_pkg.vs:main',
         ],
     },
 )

@@ -86,12 +86,19 @@ RUN apt-get update && apt-get install -y \
     traceroute \
     netcat \
     tcpdump \
-    iw
+    iw \
+    ros-foxy-gazebo-ros \
+    ros-foxy-turtlebot3-gazebo \
+    ros-foxy-tf-transformations 
+
+# last 3 is my added
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
 
 RUN pip3 install -U pip setuptools==58.2.0
 RUN pip3 install roslibpy
+# my added
+RUN sudo pip3 install transforms3d 
 
 
 COPY warehouse_interfaces/ /home/ros2_ws/src/warehouse_interfaces/
@@ -107,13 +114,3 @@ RUN cd $ROS2_WS \
     && colcon build \
     && . $ROS2_WS/install/setup.sh
 
-#################### my add commands ##################
-RUN . /opt/ros/foxy/setup.sh && \
-    sudo apt-get update && \
-    sudo apt-get install -y ros-foxy-gazebo-ros
-
-RUN sudo apt-get install -y ros-foxy-turtlebot3-gazebo
-
-RUN sudo apt install -y ros-foxy-tf-transformations 
-
-RUN sudo pip3 install transforms3d 

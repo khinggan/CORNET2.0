@@ -294,8 +294,6 @@ class VirtualStructure(Node):
             msg12, msg13, msg23 = Float32(), Float32(), Float32()
             msg12.data, msg13.data, msg23.data = e12, e13, e23
 
-            self.get_logger().info(str(e12) + "," + str(e13) + "," + str(e23) + ";")
-
             self.formation_error_publisher_12.publish(msg12)
             self.formation_error_publisher_13.publish(msg13)
             self.formation_error_publisher_23.publish(msg23)

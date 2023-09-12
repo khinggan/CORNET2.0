@@ -8,6 +8,7 @@ from rclpy.node import Node
 from ament_index_python.packages import get_package_share_directory
 from gazebo_msgs.srv import SpawnEntity
 import os
+package_name = "robot_spawner_pkg"
 
 
 def main():
@@ -27,7 +28,7 @@ def main():
 
     # Get path to the turtlebot3 model
     sdf_file_path = os.path.join(
-        get_package_share_directory("comm_based_mrs_formation"), "model.sdf")
+        get_package_share_directory(package_name), "model.sdf")
 
     # Set data for request
     request = SpawnEntity.Request()
