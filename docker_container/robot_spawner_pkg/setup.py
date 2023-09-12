@@ -1,4 +1,5 @@
 from setuptools import setup
+from glob import glob
 
 package_name = 'robot_spawner_pkg'
 
@@ -10,6 +11,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, glob('launch/*.launch.py')),
+        ('share/' + package_name, glob('urdf/*')), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -20,7 +23,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'spawn_turtlebot = robot_spawner_pkg.spawn_turtlebot:main'
+            'spawn_turtlebot = robot_spawner_pkg.spawn_turtlebot:main', 
+            'turtlebot3_spawner = robot_spawner_pkg.turtlebot3_spawner:main',
+            'vs = comm_based_mrs_formation.vs:main',
         ],
     },
 )
