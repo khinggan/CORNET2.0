@@ -114,6 +114,6 @@ RUN . /opt/ros/foxy/setup.sh && \
 
 RUN sudo apt-get install -y ros-foxy-turtlebot3-gazebo
 
-RUN sudo apt install ros-foxy-tf-transformations 
+RUN sudo apt install -y ros-foxy-tf-transformations 
 
 RUN sudo pip3 install transforms3d 
