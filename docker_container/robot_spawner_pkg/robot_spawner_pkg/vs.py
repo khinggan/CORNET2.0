@@ -7,6 +7,8 @@ import tf_transformations
 import numpy as np
 from std_msgs.msg import Float32
 from visualization_msgs.msg import Marker
+import csv
+from datetime import datetime
 
 # Turtlebot3 velocity constraint
 MAX_LINEAR_SPEED = 0.22
@@ -52,7 +54,7 @@ class VirtualStructure(Node):
         self.target_idx = 0    # target index of waypoints
         # Initial target vs
         self.target_vs = self.get_target_vs()
-        self.create_timer(frequency, self.virtual_structure)
+        self.vs_timer = self.create_timer(frequency, self.virtual_structure)
 
         ######### visualization parameters ##########
         self.vs_visualize_publisher = self.create_publisher(Marker, "virtualstructure", 10)
@@ -61,10 +63,19 @@ class VirtualStructure(Node):
         self.real_path_publisher = [self.create_publisher(Marker, "robot_{}".format(i), 10) for i in range(self.N)]
 
         ######### performance evaluation parameters ##########
-        self.formation_error_publisher_12 = self.create_publisher(Float32, "e12", 10)
-        self.formation_error_publisher_13 = self.create_publisher(Float32, "e13", 10)
-        self.formation_error_publisher_23 = self.create_publisher(Float32, "e23", 10)
-        # self.performance_evaluation_timer = self.create_timer(0.05, self.performance_evaluation)
+        # self.formation_error_publisher_12 = self.create_publisher(Float32, "e12", 10)
+        # self.formation_error_publisher_13 = self.create_publisher(Float32, "e13", 10)
+        # self.formation_error_publisher_23 = self.create_publisher(Float32, "e23", 10)
+        # write formation error to csv file
+        self.formation_error_csv_filename = './src/formation_error_{}.csv'.format(datetime.now().strftime('%Y-%m-%d-%H:%M:%S'))
+        self.formation_error_csv_file = open(self.formation_error_csv_filename, 'w', newline='')
+        self.formation_error_csv_writer = csv.writer(self.formation_error_csv_file)
+        self.formation_error_csv_writer.writerow(['e12', 'e13', 'e23'])
+        # write trajectory to csv file
+        self.trajectory_csv_filename = './src/trajectory_{}.csv'.format(datetime.now().strftime('%Y-%m-%d-%H:%M:%S'))
+        self.trajectory_csv_file = open(self.trajectory_csv_filename, 'w', newline='')
+        self.trajectory_csv_writer = csv.writer(self.trajectory_csv_file)
+        self.trajectory_csv_writer.writerow(['x0', 'y0', 'x1', 'y1', 'x2', 'y2'])
     
     def callback_robots(self, data, id):
         self.robots_poses[id] = data.pose.pose    # position and orientation
@@ -78,6 +89,12 @@ class VirtualStructure(Node):
                     self.target_vs = self.get_target_vs()
                 else:
                     self.target_idx = len(self.waypoints[0]) - 1
+                    for i in range(self.N):
+                        final_msg = Twist()
+                        final_msg.linear.x = 0.0
+                        final_msg.angular.z = 0.0
+                        self.velocity_publisher[i].publish(final_msg)
+                    self.vs_timer.cancel()
             else:
                 for i in range(self.N):
                     vi, wi = self.move2pose(
@@ -286,23 +303,49 @@ class VirtualStructure(Node):
 
     def performance_evaluation(self):
         if len(self.robots_poses) == self.N:
-            # e12 = current distance - desired distance, e13, e23 
-            e12 = math.hypot(self.robots_poses[0].position.x - self.robots_poses[1].position.x, self.robots_poses[0].position.y - self.robots_poses[1].position.y) - math.sqrt(3)
-            e13 = math.hypot(self.robots_poses[0].position.x - self.robots_poses[2].position.x, self.robots_poses[0].position.y - self.robots_poses[2].position.y) - math.sqrt(3)
-            e23 = math.hypot(self.robots_poses[1].position.x - self.robots_poses[2].position.x, self.robots_poses[1].position.y - self.robots_poses[2].position.y) - math.sqrt(3)
+            # e12 = current distance - desired distance, e13, e23 is same
+            x0, y0 = self.robots_poses[0].position.x, self.robots_poses[0].position.y
+            x1, y1 = self.robots_poses[1].position.x, self.robots_poses[1].position.y
+            x2, y2 = self.robots_poses[2].position.x, self.robots_poses[2].position.y
+            e12 = math.hypot(
+                math.hypot(
+                    x0 - x1,
+                    y0 - y1) - math.sqrt(3))    # desired distance of e12 is sqrt(3)
+            e13 = math.hypot(
+                math.hypot(
+                    x0 - x2, 
+                    y0 - y2) - math.sqrt(3))
+            e23 = math.hypot(
+                math.hypot(
+                    x1 - x2, 
+                    y1 - y2) - math.sqrt(3))
 
-            msg12, msg13, msg23 = Float32(), Float32(), Float32()
-            msg12.data, msg13.data, msg23.data = e12, e13, e23
+            # msg12, msg13, msg23 = Float32(), Float32(), Float32()
+            # msg12.data, msg13.data, msg23.data = e12, e13, e23
 
-            self.formation_error_publisher_12.publish(msg12)
-            self.formation_error_publisher_13.publish(msg13)
-            self.formation_error_publisher_23.publish(msg23)
+            # self.formation_error_publisher_12.publish(msg12)
+            # self.formation_error_publisher_13.publish(msg13)
+            # self.formation_error_publisher_23.publish(msg23)
+
+            # self.get_logger().info(str(e12) + ", " + str(e13) + ", " + str(e23) + ";")
+
+            # write formation error to csv file
+            self.formation_error_csv_writer.writerow([str(e12), str(e13), str(e23)])
+            # write trajectory to csv file
+            
+            self.trajectory_csv_writer.writerow([str(x0), str(y0), str(x1), str(y1), str(x2), str(y2)])
+
+
+    def shutdown(self):
+        self.formation_error_csv_file.close()
+        self.trajectory_csv_file.close()
+        super().destroy_node()
 
 def main():
     rclpy.init()
     virtual_structure = VirtualStructure()
     rclpy.spin(virtual_structure)
-    virtual_structure.destroy_node()
+    virtual_structure.shutdown()
     rclpy.shutdown()
 
 if __name__ == '__main__':
