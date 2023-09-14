@@ -20,7 +20,7 @@ Kp_alpha = 8
 Kp_beta = -1.5
 
 # run frequecy
-frequency = 0.2    # [seconds]
+frequency = 0.1    # [seconds]
 queue_size = 100
 
 # Pure Pursuit Algorithm Parameters
