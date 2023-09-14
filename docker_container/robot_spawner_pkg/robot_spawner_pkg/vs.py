@@ -20,7 +20,8 @@ Kp_alpha = 8
 Kp_beta = -1.5
 
 # run frequecy
-frequency = 0.05    # [seconds]
+frequency = 0.2    # [seconds]
+queue_size = 100
 
 # Pure Pursuit Algorithm Parameters
 LOOK_AHEAD_DISTANCE = 0.4    # [m]
@@ -44,9 +45,9 @@ class VirtualStructure(Node):
         # 3. Gazebo -> /odom -> position ===> init self.robots_poses
         self.robots_poses = {}
         for r in range(self.N):
-            self.create_subscription(Odometry, '/agent_{}/odom'.format(r), lambda data, id=r: self.callback_robots(data, id), 10)
+            self.create_subscription(Odometry, '/agent_{}/odom'.format(r), lambda data, id=r: self.callback_robots(data, id), queue_size)
         # 4. /cmd_vel for each topic
-        self.velocity_publisher = [self.create_publisher(Twist, '/agent_{}/cmd_vel'.format(i), 10) for i in range(self.N)]
+        self.velocity_publisher = [self.create_publisher(Twist, '/agent_{}/cmd_vel'.format(i), queue_size) for i in range(self.N)]
         # 5. Base Virtual Structure positions
         self.base_virtual_structure = self.compute_VS(3)     #  from regular polygon to position, in this case, regular triangle
         
@@ -57,15 +58,15 @@ class VirtualStructure(Node):
         self.vs_timer = self.create_timer(frequency, self.virtual_structure)
 
         ######### visualization parameters ##########
-        self.vs_visualize_publisher = self.create_publisher(Marker, "virtualstructure", 10)
-        self.robot_visualize_publisher = [self.create_publisher(Marker, "robot_{}".format(i), 10) for i in range(self.N)]
-        self.waypoints_publisher = self.create_publisher(Marker, "virtualstructure", 10)
-        self.real_path_publisher = [self.create_publisher(Marker, "robot_{}".format(i), 10) for i in range(self.N)]
+        # self.vs_visualize_publisher = self.create_publisher(Marker, "virtualstructure", queue_size)
+        # self.robot_visualize_publisher = [self.create_publisher(Marker, "robot_{}".format(i), queue_size) for i in range(self.N)]
+        # self.waypoints_publisher = self.create_publisher(Marker, "virtualstructure", queue_size)
+        # self.real_path_publisher = [self.create_publisher(Marker, "robot_{}".format(i), queue_size) for i in range(self.N)]
 
         ######### performance evaluation parameters ##########
-        # self.formation_error_publisher_12 = self.create_publisher(Float32, "e12", 10)
-        # self.formation_error_publisher_13 = self.create_publisher(Float32, "e13", 10)
-        # self.formation_error_publisher_23 = self.create_publisher(Float32, "e23", 10)
+        # self.formation_error_publisher_12 = self.create_publisher(Float32, "e12", queue_size)
+        # self.formation_error_publisher_13 = self.create_publisher(Float32, "e13", queue_size)
+        # self.formation_error_publisher_23 = self.create_publisher(Float32, "e23", queue_size)
         # write formation error to csv file
         self.formation_error_csv_filename = './src/formation_error_{}.csv'.format(datetime.now().strftime('%Y-%m-%d-%H:%M:%S'))
         self.formation_error_csv_file = open(self.formation_error_csv_filename, 'w', newline='')
@@ -113,7 +114,7 @@ class VirtualStructure(Node):
                     msgi.linear.x = vi
                     msgi.angular.z = wi
                     self.velocity_publisher[i].publish(msgi)
-            self.visualize()
+            # self.visualize()
             self.performance_evaluation()
 
     def compute_VS(self, shape):
@@ -227,6 +228,7 @@ class VirtualStructure(Node):
         else:
             return False
 
+    '''
     def visualize(self):
         # initialize virtual structure visions
         points = []
@@ -300,7 +302,8 @@ class VirtualStructure(Node):
         self.waypoints_publisher.publish(waypoints_visualize)
 
         # visualize robots path
-
+    '''
+    
     def performance_evaluation(self):
         if len(self.robots_poses) == self.N:
             # e12 = current distance - desired distance, e13, e23 is same
