@@ -26,8 +26,8 @@ class CornetConfig:
             resp['z'] = int(point.pose.position.z)
             res['position'] = resp
             return res
-        except rospy.ServiceException, e:
-            print "Service call failed: %s" % e
+        except rospy.ServiceException as e:
+            print ("Service call failed: %s" % e)
 
     def generate_config(self):
         models = self.config['gazebo_models']

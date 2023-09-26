@@ -81,7 +81,7 @@ class LIPController(object):
                 self.cmd = -100
             self.pubs.publish(self.cmd)
         except:
-            print "except"
+            print("except")
 
 
 def main():

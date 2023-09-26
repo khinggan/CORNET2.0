@@ -1,0 +1,76 @@
+gazebo_models:
+- robot0
+- robot1
+- robot2
+- ap_0
+
+ip_list:
+- 10.0.0.2
+- 10.0.0.3
+- 10.0.0.4
+- 10.0.0.0
+pose:
+- position:
+    x: 10
+    y: 0
+    z: 0
+- position:
+    x: -1
+    y: 1
+    z: 0
+- position:
+    x: -1
+    y: -1
+    z: 0
+- position:
+    x: 0
+    y: 0
+    z: 0
+
+
+type:
+- MOBILE
+- MOBILE
+- MOBILE
+- STATIC
+
+
+image:
+- "cornet:focalfoxyNWH"
+
+robot_number: 3
+robot_model: "burger"
+spawn_robots: True # If set to False only the robot state publisher is launched
+robot_information:
+  robot_namespace:
+    - "robot0"
+    - "robot1"
+    - "robot2"
+  robot_pos_x:
+    - 10.0
+    - -1.0
+    - -1.0
+  robot_pos_y:
+    - 0.0
+    - 1.0
+    - -1.0
+  robot_pos_z:
+    - 0.0
+    - 0.0
+    - 0.0
+  robot_ip:
+    - 10.0.0.2
+    - 10.0.0.3
+    - 10.0.0.4
+
+access_points: 1
+static_information:
+  ap_namespace:
+    - "ap_0"
+  ap_pos_x:
+    - 0.0
+  ap_pos_y:
+    - 0.0
+  ap_pos_z:
+    - 0.0
+

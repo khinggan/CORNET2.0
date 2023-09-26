@@ -1,19 +1,12 @@
-#!/usr/bin/python3
-"""
-Build 1 AP and 3 Stations using mininet-WiFi
-Add container host on the station1
-"""
+import os
+import sys
+import yaml
 from containernet.net import Containernet
-from containernet.node import DockerSta, Docker
-from containernet.cli import CLI
-from containernet.term import makeTerm
-from containernet.link import TCLink
 from mininet.log import info, setLogLevel
 from mn_wifi.link import wmediumd
 from mn_wifi.wmediumdConnector import interference
-import sys
-import os
-import yaml
+from containernet.cli import CLI
+from containernet.node import DockerSta, Docker
 
 
 def topology(args):
@@ -71,8 +64,8 @@ def topology(args):
         net.configureWifiNodes()
 
         if '-p' not in args:
-            net.plotGraph(min_x=-15, max_x=55, min_y=-15, max_y=55)
-            # net.plotGraph(max_x=50, max_y=50)
+            #net.plotGraph(min_x=-15, max_x=15, min_y=-15, max_y=15)
+            net.plotGraph(max_x=50, max_y=50)
         
         for sta in sta_list:
             sta.cmd('service ssh restart')
@@ -95,13 +88,12 @@ def topology(args):
 
         info('*** Running CLI\n')
         CLI(net)
-        os.system('sudo service network-manager start')
+        # os.system('sudo service network-manager start')
 
         info('*** Stopping network\n')
         net.stop()
 
 
-if __name__ == '__main__':
-    # os.system('sudo systemctl stop network-manager')
+if __name__ == "__main__":
     setLogLevel('info')
-    topology(sys.argv)
+    topology(sys.argv())
