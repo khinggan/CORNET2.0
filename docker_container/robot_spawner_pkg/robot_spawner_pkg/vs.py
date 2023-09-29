@@ -104,42 +104,82 @@ class VirtualStructure(Node):
 
     def virtual_structure(self):
         if len(self.robots_poses) == self.N:
-            if self.check_reach():    # All robot get positino  and robots 
-                                                                       # reach the desired virtual structure target position
-                if self.target_idx < len(self.waypoints[0]) - 1:
+            if self.target_idx < len(self.waypoints[0]) - 1:
+                # not reach the final waypoint destination
+                if self.check_reach():
                     self.target_idx += 1
                     self.target_vs = self.get_target_vs()
                 else:
-                    self.target_idx = len(self.waypoints[0]) - 1
                     for i in range(self.N):
-                        final_msg = Twist()
-                        final_msg.linear.x = 0.0
-                        final_msg.angular.z = 0.0
-                        self.velocity_publisher[i].publish(final_msg)
-                    self.vs_timer.cancel()
-            else:
-                for i in range(self.N):
-                    vi, wi = self.move2pose(
-                        self.robots_poses[i].position.x, 
-                        self.robots_poses[i].position.y, 
-                        tf_transformations.euler_from_quaternion([self.robots_poses[i].orientation.x, self.robots_poses[i].orientation.y, self.robots_poses[i].orientation.z, self.robots_poses[i].orientation.w])[2],
-                        self.target_vs[0, i],  
-                        self.target_vs[1, i], 
-                        self.target_vs[2, i], 
-                    )
-                    if abs(vi) > MAX_LINEAR_SPEED:
-                        vi= np.sign(vi) * MAX_LINEAR_SPEED
-                    if abs(wi) > MAX_ANGULAR_SPEED:
-                        wi = np.sign(wi) * MAX_ANGULAR_SPEED
-                    msgi = Twist()
-                    msgi.linear.x = vi
-                    msgi.angular.z = wi
-                    self.get_logger().info(str(self.rtts[i]) + "s")
-                    time.sleep(self.rtts[i])
+                        vi, wi = self.move2pose(
+                            self.robots_poses[i].position.x, 
+                            self.robots_poses[i].position.y, 
+                            tf_transformations.euler_from_quaternion([self.robots_poses[i].orientation.x, self.robots_poses[i].orientation.y, self.robots_poses[i].orientation.z, self.robots_poses[i].orientation.w])[2],
+                            self.target_vs[0, i],  
+                            self.target_vs[1, i], 
+                            self.target_vs[2, i], 
+                        )
+                        if abs(vi) > MAX_LINEAR_SPEED:
+                            vi= np.sign(vi) * MAX_LINEAR_SPEED
+                        if abs(wi) > MAX_ANGULAR_SPEED:
+                            wi = np.sign(wi) * MAX_ANGULAR_SPEED
+                        msgi = Twist()
+                        msgi.linear.x = vi
+                        msgi.angular.z = wi
+                        self.get_logger().info(str(self.rtts[i]) + "s")
+                        time.sleep(self.rtts[i])
 
-                    self.velocity_publisher[i].publish(msgi)
+                        self.velocity_publisher[i].publish(msgi)
+                self.performance_evaluation()
+            else:
+                # reach the final waypoint destination
+                self.target_idx = len(self.waypoints[0]) - 1
+                for i in range(self.N):
+                    final_msg = Twist()
+                    final_msg.linear.x = 0.0
+                    final_msg.angular.z = 0.0
+                    self.velocity_publisher[i].publish(final_msg)
+                self.vs_timer.cancel()
+                self.rtt_timer.cancel()
+
+
+        # if len(self.robots_poses) == self.N:
+        #     if self.check_reach():    # All robot get positino  and robots 
+        #                                                                # reach the desired virtual structure target position
+        #         if self.target_idx < len(self.waypoints[0]) - 1:
+        #             self.target_idx += 1
+        #             self.target_vs = self.get_target_vs()
+        #         else:
+        #             self.target_idx = len(self.waypoints[0]) - 1
+        #             for i in range(self.N):
+        #                 final_msg = Twist()
+        #                 final_msg.linear.x = 0.0
+        #                 final_msg.angular.z = 0.0
+        #                 self.velocity_publisher[i].publish(final_msg)
+        #             self.vs_timer.cancel()
+        #     else:
+        #         for i in range(self.N):
+        #             vi, wi = self.move2pose(
+        #                 self.robots_poses[i].position.x, 
+        #                 self.robots_poses[i].position.y, 
+        #                 tf_transformations.euler_from_quaternion([self.robots_poses[i].orientation.x, self.robots_poses[i].orientation.y, self.robots_poses[i].orientation.z, self.robots_poses[i].orientation.w])[2],
+        #                 self.target_vs[0, i],  
+        #                 self.target_vs[1, i], 
+        #                 self.target_vs[2, i], 
+        #             )
+        #             if abs(vi) > MAX_LINEAR_SPEED:
+        #                 vi= np.sign(vi) * MAX_LINEAR_SPEED
+        #             if abs(wi) > MAX_ANGULAR_SPEED:
+        #                 wi = np.sign(wi) * MAX_ANGULAR_SPEED
+        #             msgi = Twist()
+        #             msgi.linear.x = vi
+        #             msgi.angular.z = wi
+        #             self.get_logger().info(str(self.rtts[i]) + "s")
+        #             time.sleep(self.rtts[i])
+
+        #             self.velocity_publisher[i].publish(msgi)
             # self.visualize()
-            self.performance_evaluation()
+            # self.performance_evaluation()
     
 
     def get_rtt(self):
