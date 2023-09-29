@@ -51,7 +51,7 @@ def topology(args):
                                               mode='g', position=position, failMode="standalone"))
 
         # c0 = net.addController('c0')
-        h1 = net.addHost('h1', ip='10.0.0.1/24', cls=Docker, dimage="cornet:focalfoxyNWH")
+        # h1 = net.addHost('h1', ip='10.0.0.1/24', cls=Docker, dimage="cornet:focalfoxyNWH")
 
         #ap1 = net.addAccessPoint("ap1",ssid='centre', mode='g', position='30,30,0',failMode="standalone")
 
@@ -76,8 +76,7 @@ def topology(args):
         
         for sta in sta_list:
             sta.cmd('service ssh restart')
-
-        h1.cmd('service ssh restart')
+        # h1.cmd('service ssh restart')
 
         info('*** Starting network\n')
         net.build()

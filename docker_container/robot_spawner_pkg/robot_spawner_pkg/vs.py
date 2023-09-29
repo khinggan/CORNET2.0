@@ -1,3 +1,7 @@
+import platform
+import re
+import subprocess
+import time
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Pose, Twist, Point
@@ -44,6 +48,21 @@ class VirtualStructure(Node):
         self.waypoints = self.get_waypoints("ellipse")
         # 3. Gazebo -> /odom -> position ===> init self.robots_poses
         self.robots_poses = {}
+        self.station_ip = {
+            0: "10.0.0.2", 
+            1: "10.0.0.3", 
+            2: "10.0.0.4"
+        }
+        # self.station_ip = {
+        #     0: "172.17.0.2", 
+        #     1: "172.17.0.3", 
+        #     2: "172.17.0.4"
+        # }
+        self.rtts = {
+            0: 0.0,
+            1: 0.0,
+            2: 0.0
+        }
         for r in range(self.N):
             self.create_subscription(Odometry, '/agent_{}/odom'.format(r), lambda data, id=r: self.callback_robots(data, id), queue_size)
         # 4. /cmd_vel for each topic
@@ -51,6 +70,8 @@ class VirtualStructure(Node):
         # 5. Base Virtual Structure positions
         self.base_virtual_structure = self.compute_VS(3)     #  from regular polygon to position, in this case, regular triangle
         
+        self.rtt_timer = self.create_timer(frequency, self.get_rtt)
+
         ######### virtual structure algorithm ##########
         self.target_idx = 0    # target index of waypoints
         # Initial target vs
@@ -113,9 +134,34 @@ class VirtualStructure(Node):
                     msgi = Twist()
                     msgi.linear.x = vi
                     msgi.angular.z = wi
+                    self.get_logger().info(str(self.rtts[i]) + "s")
+                    time.sleep(self.rtts[i])
+
                     self.velocity_publisher[i].publish(msgi)
             # self.visualize()
             self.performance_evaluation()
+    
+
+    def get_rtt(self):
+        # get RTT delay between control station and related station
+        for i in range(self.N):
+            result = self.get_delay(i)
+            rtt_times = re.findall(r"time=([\d.]+) ms", result)
+            rtt = rtt_times[0] if len(rtt_times) > 0 else 0    # [ms], string
+            rtt = float(rtt) / 1000    # [s]
+            # self.get_logger().info(str(rtt) + "s")
+            self.rtts[i] = rtt
+
+    def get_delay(self, stasId):
+        try:
+            stas_ip = self.station_ip[stasId]
+            output = subprocess.check_output(
+                ['ping', '-c', '1', stas_ip], text=True, timeout=10)
+        except Exception as e:
+            print(f"An exception occurred: {str(e)}")
+            output = None
+
+        return output
 
     def compute_VS(self, shape):
         vs = np.zeros((shape, self.N))
