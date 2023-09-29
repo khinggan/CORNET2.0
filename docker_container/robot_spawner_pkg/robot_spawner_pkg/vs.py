@@ -70,7 +70,7 @@ class VirtualStructure(Node):
         # 5. Base Virtual Structure positions
         self.base_virtual_structure = self.compute_VS(3)     #  from regular polygon to position, in this case, regular triangle
         
-        self.rtt_timer = self.create_timer(frequency, self.get_rtt)
+        # self.rtt_timer = self.create_timer(frequency, self.get_rtt)
 
         ######### virtual structure algorithm ##########
         self.target_idx = 0    # target index of waypoints
@@ -127,7 +127,7 @@ class VirtualStructure(Node):
                         msgi.linear.x = vi
                         msgi.angular.z = wi
                         self.get_logger().info(str(self.rtts[i]) + "s")
-                        time.sleep(self.rtts[i])
+                        # time.sleep(self.rtts[i])
 
                         self.velocity_publisher[i].publish(msgi)
                 self.performance_evaluation()
@@ -140,68 +140,28 @@ class VirtualStructure(Node):
                     final_msg.angular.z = 0.0
                     self.velocity_publisher[i].publish(final_msg)
                 self.vs_timer.cancel()
-                self.rtt_timer.cancel()
+                # self.rtt_timer.cancel()
 
+    # def get_rtt(self):
+    #     # get RTT delay between control station and related station
+    #     for i in range(self.N):
+    #         result = self.get_delay(i)
+    #         rtt_times = re.findall(r"time=([\d.]+) ms", result)
+    #         rtt = rtt_times[0] if len(rtt_times) > 0 else 0    # [ms], string
+    #         rtt = float(rtt) / 1000    # [s]
+    #         # self.get_logger().info(str(rtt) + "s")
+    #         self.rtts[i] = rtt
 
-        # if len(self.robots_poses) == self.N:
-        #     if self.check_reach():    # All robot get positino  and robots 
-        #                                                                # reach the desired virtual structure target position
-        #         if self.target_idx < len(self.waypoints[0]) - 1:
-        #             self.target_idx += 1
-        #             self.target_vs = self.get_target_vs()
-        #         else:
-        #             self.target_idx = len(self.waypoints[0]) - 1
-        #             for i in range(self.N):
-        #                 final_msg = Twist()
-        #                 final_msg.linear.x = 0.0
-        #                 final_msg.angular.z = 0.0
-        #                 self.velocity_publisher[i].publish(final_msg)
-        #             self.vs_timer.cancel()
-        #     else:
-        #         for i in range(self.N):
-        #             vi, wi = self.move2pose(
-        #                 self.robots_poses[i].position.x, 
-        #                 self.robots_poses[i].position.y, 
-        #                 tf_transformations.euler_from_quaternion([self.robots_poses[i].orientation.x, self.robots_poses[i].orientation.y, self.robots_poses[i].orientation.z, self.robots_poses[i].orientation.w])[2],
-        #                 self.target_vs[0, i],  
-        #                 self.target_vs[1, i], 
-        #                 self.target_vs[2, i], 
-        #             )
-        #             if abs(vi) > MAX_LINEAR_SPEED:
-        #                 vi= np.sign(vi) * MAX_LINEAR_SPEED
-        #             if abs(wi) > MAX_ANGULAR_SPEED:
-        #                 wi = np.sign(wi) * MAX_ANGULAR_SPEED
-        #             msgi = Twist()
-        #             msgi.linear.x = vi
-        #             msgi.angular.z = wi
-        #             self.get_logger().info(str(self.rtts[i]) + "s")
-        #             time.sleep(self.rtts[i])
+    # def get_delay(self, stasId):
+    #     try:
+    #         stas_ip = self.station_ip[stasId]
+    #         output = subprocess.check_output(
+    #             ['ping', '-c', '1', stas_ip], text=True, timeout=10)
+    #     except Exception as e:
+    #         print(f"An exception occurred: {str(e)}")
+    #         output = None
 
-        #             self.velocity_publisher[i].publish(msgi)
-            # self.visualize()
-            # self.performance_evaluation()
-    
-
-    def get_rtt(self):
-        # get RTT delay between control station and related station
-        for i in range(self.N):
-            result = self.get_delay(i)
-            rtt_times = re.findall(r"time=([\d.]+) ms", result)
-            rtt = rtt_times[0] if len(rtt_times) > 0 else 0    # [ms], string
-            rtt = float(rtt) / 1000    # [s]
-            # self.get_logger().info(str(rtt) + "s")
-            self.rtts[i] = rtt
-
-    def get_delay(self, stasId):
-        try:
-            stas_ip = self.station_ip[stasId]
-            output = subprocess.check_output(
-                ['ping', '-c', '1', stas_ip], text=True, timeout=10)
-        except Exception as e:
-            print(f"An exception occurred: {str(e)}")
-            output = None
-
-        return output
+    #     return output
 
     def compute_VS(self, shape):
         vs = np.zeros((shape, self.N))
